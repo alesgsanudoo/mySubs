@@ -30,26 +30,25 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         const {isLogin, ...userData} = req.body;
         const cookies = req.cookies;
-        if (cookies && cookies.authToken) { //Check for token
-            console.log("HEY")
+        if (cookies && cookies.LOGIN_INFO) { //Check for token
             try {
                 await connectDB()
-                const authToken = cookies.authToken;
+                const authToken = cookies.LOGIN_INFO;
                 const user_session = await Session.findOne({token: authToken});
                 if (!user_session) { //User session not found, return null
-                    res.setHeader('Set-Cookie', cookie.serialize('authToken', '', {
+                    res.setHeader('Set-Cookie', cookie.serialize('LOGIN_INFO', '', {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         expires: new Date(0),
                         sameSite: 'strict',
                         path: '/',
                     }));
-                    return res.status(401).json({errorMessage: "Something went wrong..."});
+                    return res.status(401).json({errorMessage: "Session not found."});
                 }
                 const findUser = await User.findOne({_id: user_session.userID});
                 if (!findUser) { //User not found by ID, return null
                     await Session.deleteOne(user_session);
-                    res.setHeader('Set-Cookie', cookie.serialize('authToken', '', {
+                    res.setHeader('Set-Cookie', cookie.serialize('LOGIN_INFO', '', {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         expires: new Date(0), // Set the expiration date to a past date
@@ -57,7 +56,7 @@ export default async function handler(req, res) {
                         path: '/',
                     }));
 
-                    return res.status(500).json({errorMessage: "Something went wrong..."});
+                    return res.status(500).json({errorMessage: "User not found..."});
                 }
 
                 await verifyToken(authToken, process.env.TOKEN_KEY);
@@ -97,7 +96,6 @@ const handleSignIn = async (req, res, {username2, password2}) => {
         console.log(username2, password2);
         if (!username2 || !password2 || username2 === '' || password2 === '') {
             //Check for null fields or empty fields.
-            console.log("WHY?");
             return res.status(400).json({errorMessage: "Empty fields."});
         }
 
@@ -124,7 +122,6 @@ const handleSignIn = async (req, res, {username2, password2}) => {
             );
 
             const user_session = await Session.findOne({userID: findUser._id}); // Find session
-
             if (user_session) { //Check if it does exist the session and update the session
                 await Session.findOneAndUpdate({userID: findUser._id}, {token: token}, {new: true});
             } else {
@@ -134,7 +131,7 @@ const handleSignIn = async (req, res, {username2, password2}) => {
                 });
             }
 
-            res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
+            res.setHeader('Set-Cookie', cookie.serialize('LOGIN_INFO', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: TOKEN_EXPIRE,
@@ -213,7 +210,7 @@ const handleSignUp = async (req, res, {name, username, email, password}) => {
                 token: token,
             });
 
-            res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
+            res.setHeader('Set-Cookie', cookie.serialize('LOGIN_INFO', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: TOKEN_EXPIRE,

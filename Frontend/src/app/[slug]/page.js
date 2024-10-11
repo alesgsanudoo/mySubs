@@ -12,6 +12,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
 import Image from 'next/image'
+import axios from "axios";
 
 const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other']
 const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple']
@@ -31,6 +32,16 @@ export default function Home(props) {
 
     const { toast } = useToast()
 
+    useEffect(() => {
+        axios.get('/api/' + props.params.slug).then((response) => {
+            toast({
+                title: "TEST",
+                description: `You are logged in as ${username}`,
+            });
+        }).catch((error) => {
+            console.log(error)
+        })
+    },[])
 
     const fetchLogo = async (companyName) => {
         try {
@@ -369,7 +380,7 @@ export default function Home(props) {
                     </h2>
                     <h2 className="text-gray-500 text-center">
                         Built with <a href="https://nextjs.org/" target="_blank"
-                                      className="font-boldtext-purple-600 hover:text-purple-700">NextJS</a>, <a
+                                      className="font-bold text-purple-600 hover:text-purple-700">NextJS</a>, <a
                         href="https://tailwindcss.com/" target="_blank"
                         className="font-bold text-purple-600 hover:text-purple-700">TailwindCSS</a>,
                         and <a

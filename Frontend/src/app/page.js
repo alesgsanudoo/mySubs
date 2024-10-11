@@ -10,10 +10,6 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/compo
 import {useToast} from "@/hooks/use-toast"
 import axios from 'axios';
 import {Skeleton} from "@/components/ui/skeleton";
-import Cookies from 'js-cookie';
-
-const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other']
-const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple']
 
 export default function Home() {
     const [username, setUsername] = useState('')
@@ -74,7 +70,6 @@ export default function Home() {
                     console.log(error.response);
                     if (error && error.response) {
                         const {status, data} = error.response;
-                        console.log("HERE")
                         if (status === 400 || status === 409) { //Wrong syntax or No access
                             if (data.errorMessage.toLowerCase().includes("password")) {
                                 setPasswordError(data.errorMessage);
@@ -113,10 +108,6 @@ export default function Home() {
     }
 
     useEffect(() => {
-        const authToken = Cookies.get('authToken');
-        console.log("TEST")
-        console.log(authToken)
-        console.log("TEST2");
         axios.post('/api/auth', {
             isLogin: 3,
         }).then((response) => {
@@ -442,7 +433,7 @@ export default function Home() {
                     </h2>
                     <h2 className="text-gray-500 text-center">
                         Built with <a href="https://nextjs.org/" target="_blank"
-                                      className="font-boldtext-purple-600 hover:text-purple-700">NextJS</a>, <a
+                                      className="font-bold text-purple-600 hover:text-purple-700">NextJS</a>, <a
                         href="https://tailwindcss.com/" target="_blank"
                         className="font-bold text-purple-600 hover:text-purple-700">TailwindCSS</a>,
                         and <a
