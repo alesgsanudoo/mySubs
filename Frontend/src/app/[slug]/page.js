@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Switch } from "@/components/ui/switch"
 import Image from 'next/image'
 import axios from "axios";
+import {useRouter} from "next/navigation";
 
 const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other']
 const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple']
@@ -29,17 +30,30 @@ export default function Home(props) {
     const [userSettings, setUserSettings] = useState({
         currency: 'USD',
     })
-
+    const [isLoading, setLoading] = useState(true);
+    const router = useRouter();
     const { toast } = useToast()
 
     useEffect(() => {
         axios.get('/api/' + props.params.slug).then((response) => {
-            toast({
-                title: "TEST",
-                description: `You are logged in as ${username}`,
-            });
+            setLoading(false);
         }).catch((error) => {
-            console.log(error)
+            if (error && error.response) {
+                const {status, data} = error.response;
+                console.error('Error authenticating:', error);
+                if (status === 500 || status === 401) {
+                    toast({
+                        title: "Authentication Error",
+                        variant: "destructive",
+                        description: "Failed to authenticate. Please log in again.",
+                    });
+                    router.push('/');
+                } else {
+                    router.push('/error/404');
+                }
+            } else {
+                router.push('/error/404');
+            }
         })
     },[])
 

@@ -112,10 +112,6 @@ export default function Home() {
             isLogin: 3,
         }).then((response) => {
             const {userID, username} = response.data;
-            toast({
-                title: "Welcome Back!",
-                description: `You are logged in as ${username}`,
-            });
             router.push('/' + userID);
         }).catch((error) => {
             if (error && error.response) {
