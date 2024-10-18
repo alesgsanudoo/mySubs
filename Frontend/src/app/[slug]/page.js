@@ -1,16 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { PlusCircle, Trash2, DollarSign, Calendar, Package, Settings, User, LogOut, CreditCard } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Switch } from "@/components/ui/switch"
+import {useState, useEffect} from 'react'
+import {PlusCircle, Trash2, DollarSign, Calendar, Package, Settings, User, LogOut, CreditCard} from 'lucide-react'
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+import {useToast} from "@/hooks/use-toast"
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from "@/components/ui/dialog"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import {Switch} from "@/components/ui/switch"
 import Image from 'next/image'
 import axios from "axios";
 import {useRouter} from "next/navigation";
@@ -32,7 +47,7 @@ export default function Home(props) {
     })
     const [isLoading, setLoading] = useState(true);
     const router = useRouter();
-    const { toast } = useToast()
+    const {toast} = useToast()
 
     useEffect(() => {
         axios.get('/api/' + props.params.slug).then((response) => {
@@ -55,7 +70,7 @@ export default function Home(props) {
                 router.push('/error/404');
             }
         })
-    },[])
+    }, [subscriptions])
 
     const fetchLogo = async (companyName) => {
         try {
@@ -131,26 +146,72 @@ export default function Home(props) {
     }, 0)
 
     const deleteAccount = () => {
-        setSubscriptions([])
-        setUserSettings({
-            currency: 'USD',
-        })
-        toast({
-            title: "Account Deleted",
-            description: "Your account and all data have been deleted.",
-            variant: "destructive",
-        })
+        try {
+            // Make a POST request to the API route using Axios
+            axios.delete('/api/' + props.params.slug + '/settings/deleteuser').then((response) => {
+                toast({
+                    title: "Account Deleted",
+                    description: "Your account and all data have been deleted.",
+                    variant: "destructive",
+                })
+                router.push('/');
+
+            }).catch((error) => {
+                console.log(error)
+                console.log(error.response);
+                if (error && error.response) {
+                    const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+                    console.error('An error occurred:', error);
+                    toast({
+                        title: "Error",
+                        variant: "destructive",
+                        description: errorMessage,
+                    });
+                }
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+            console.error('An error occurred:', error);
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: errorMessage,
+            });
+        }
     }
 
     const logout = () => {
-        setSubscriptions([])
-        setUserSettings({
-            currency: 'USD',
-        })
-        toast({
-            title: "Logged Out",
-            description: "You have been successfully logged out.",
-        })
+        try {
+            // Make a POST request to the API route using Axios
+            axios.delete('/api/' + props.params.slug + '/settings/logout').then((response) => {
+                toast({
+                    title: "Logged Out",
+                    description: "You have been successfully logged out.",
+                })
+                router.push('/');
+
+            }).catch((error) => {
+                console.log(error)
+                console.log(error.response);
+                if (error && error.response) {
+                    const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+                    console.error('An error occurred:', error);
+                    toast({
+                        title: "Error",
+                        variant: "destructive",
+                        description: errorMessage,
+                    });
+                }
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+            console.error('An error occurred:', error);
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: errorMessage,
+            });
+        }
     }
 
     return (
@@ -361,7 +422,7 @@ export default function Home(props) {
                                     <DialogFooter>
                                         <Button variant="outline" onClick={() => {
                                         }}>Cancel</Button>
-                                        <Button variant="destructive" onClick={deleteAccount}>Log out</Button>
+                                        <Button variant="destructive" onClick={logout}>Log out</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>

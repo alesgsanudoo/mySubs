@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     } else {
         // Return
         res.setHeader('Allow', ['POST']);
-        res.status(405).json({message: `Method ${req.method} not allowed`});
+        res.redirect(307, '/error/404')
     }
 }
 
