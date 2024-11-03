@@ -93,7 +93,6 @@ export default async function handler(req, res) {
 const handleSignIn = async (req, res, {username2, password2}) => {
     try {
         await connectDB()
-        console.log(username2, password2);
         if (!username2 || !password2 || username2 === '' || password2 === '') {
             //Check for null fields or empty fields.
             return res.status(400).json({errorMessage: "Empty fields."});

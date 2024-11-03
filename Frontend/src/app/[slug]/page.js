@@ -1,7 +1,7 @@
 'use client'
 
 import {useState, useEffect} from 'react'
-import {PlusCircle, Trash2, DollarSign, Calendar, Package, Settings, User, LogOut, CreditCard} from 'lucide-react'
+import {PlusCircle, Trash2, DollarSign, Calendar, Package, Loader2} from 'lucide-react'
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
@@ -29,6 +29,7 @@ import {Switch} from "@/components/ui/switch"
 import Image from 'next/image'
 import axios from "axios";
 import {useRouter} from "next/navigation";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other']
 const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple']
@@ -42,15 +43,15 @@ export default function Home(props) {
     const [date, setDate] = useState('')
     const [category, setCategory] = useState('')
     const [billingCycle, setBillingCycle] = useState('monthly')
-    const [userSettings, setUserSettings] = useState({
-        currency: 'USD',
-    })
     const [isLoading, setLoading] = useState(true);
     const router = useRouter();
     const {toast} = useToast()
 
     useEffect(() => {
         axios.get('/api/' + props.params.slug).then((response) => {
+            const subs = response.data;
+            console.log(subs);
+            setSubscriptions(subs.subs)
             setLoading(false);
         }).catch((error) => {
             if (error && error.response) {
@@ -70,54 +71,65 @@ export default function Home(props) {
                 router.push('/error/404');
             }
         })
-    }, [subscriptions])
+    }, [])
 
-    const fetchLogo = async (companyName) => {
-        try {
-            const response = await fetch(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(companyName)}`)
-            const data = await response.json()
-            console.log(data)
-            if (data && data.length > 0) {
-                return data[0].logo
-            }
-        } catch (error) {
-            console.error('Error fetching logo:', error)
-        }
-        return null
-    }
+    useEffect(() => {
+        console.log("Subscriptions updated:", subscriptions);
+    }, [subscriptions]);
+
 
     const addSubscription = async (e) => {
         e.preventDefault()
-        if (name && price && date && category) {
-            const logo = await fetchLogo(name)
-            const nextBillingDate = new Date(date)
-            if (billingCycle === 'yearly') {
-                nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1)
-            } else {
-                nextBillingDate.setMonth(nextBillingDate.getMonth() + 1)
+        if (name && price && date && category && payment && billingCycle) {
+            try {
+                axios.post('/api/' + props.params.slug + '/subscriptions/add', {
+                        name: name,
+                        price: parseFloat(price),
+                        date: date,
+                        category: category,
+                        billingCycle: billingCycle,
+                        payment: payment,
+                    }
+                ).then((response) => {
+
+                    toast({
+                        title: "Subscription added!",
+                        description: "You subscription has been added correctly.",
+                        variant: "success",
+                    })
+                    console.log(response.data.sub)
+                    console.log(response)
+                    setSubscriptions(response.data.sub);
+                    console.log(subscriptions)
+                }).catch((error) => {
+                    console.log(error)
+                    console.log(error.response);
+                    if (error && error.response) {
+                        const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
+                        console.error('An error occurred:', error);
+                        toast({
+                            title: "Error",
+                            variant: "destructive",
+                            description: errorMessage,
+                        });
+                    }
+                });
+            } catch (error) {
+                const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
+                console.error('An error occurred:', error);
+                toast({
+                    title: "Error",
+                    variant: "destructive",
+                    description: errorMessage,
+                });
             }
-            const newSubscription = {
-                id: Date.now(),
-                name,
-                price: parseFloat(price),
-                date,
-                payment,
-                category,
-                logo,
-                billingCycle,
-                nextBillingDate: nextBillingDate.toISOString().split('T')[0]
-            }
-            setSubscriptions([...subscriptions, newSubscription])
-            setName('')
-            setPrice('')
-            setPayment('')
-            setDate('')
-            setCategory('')
-            setBillingCycle('monthly')
+        } else {
+            console.error('Empty fields.');
             toast({
-                title: "Subscription Added",
-                description: `${name} has been added to your subscriptions.`,
-            })
+                title: "Error",
+                variant: "destructive",
+                description: 'Empty fields.',
+            });
         }
     }
 
@@ -147,7 +159,6 @@ export default function Home(props) {
 
     const deleteAccount = () => {
         try {
-            // Make a POST request to the API route using Axios
             axios.delete('/api/' + props.params.slug + '/settings/deleteuser').then((response) => {
                 toast({
                     title: "Account Deleted",
@@ -160,7 +171,7 @@ export default function Home(props) {
                 console.log(error)
                 console.log(error.response);
                 if (error && error.response) {
-                    const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+                    const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
                     console.error('An error occurred:', error);
                     toast({
                         title: "Error",
@@ -170,7 +181,7 @@ export default function Home(props) {
                 }
             });
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+            const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
             console.error('An error occurred:', error);
             toast({
                 title: "Error",
@@ -194,7 +205,7 @@ export default function Home(props) {
                 console.log(error)
                 console.log(error.response);
                 if (error && error.response) {
-                    const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+                    const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
                     console.error('An error occurred:', error);
                     toast({
                         title: "Error",
@@ -204,7 +215,7 @@ export default function Home(props) {
                 }
             });
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "An unexpected error occurred. Please try again later.";
+            const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
             console.error('An error occurred:', error);
             toast({
                 title: "Error",
@@ -333,41 +344,48 @@ export default function Home(props) {
                         </CardHeader>
                         <CardContent>
                             {subscriptions.length === 0 ? (
-                                <p className="text-center text-gray-500">No subscriptions added yet.</p>
+                                isLoading ? (
+                                            <div className="flex items-center justify-center h-full">
+                                                <Loader2 className="animate-spin h-10 w-10 text-purple-500"/>
+                                            </div>) :
+                                        (<p className="text-center text-gray-500">No subscriptions added yet.</p>)
                             ) : (
                                 <ul className="space-y-4">
-                                    {subscriptions.map(sub => (
-                                        <li key={sub.id}
-                                            className="flex items-center justify-between p-4 rounded-lg transition-all hover:bg-gray-200">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="rounded-full p-2 flex-shrink-0 bg-white">
-                                                    {sub.logo ? (
-                                                        <Image src={sub.logo} alt={sub.name} width={24} height={24}
-                                                               className="rounded-full"/>
-                                                    ) : (
-                                                        <Package className={"h-6 w-6 text-gray-500"}/>
-                                                    )}
+                                    <ScrollArea className="h-[400px]">
+                                        {subscriptions.map(sub => (
+                                            <li key={sub._id}
+                                                className="flex items-center justify-between p-4 rounded-lg transition-all hover:bg-gray-200">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="rounded-full p-2 flex-shrink-0 bg-white">
+                                                        {sub.logo ? (
+                                                            <Image src={sub.logo} alt={sub.name} width={24} height={24}
+                                                                   className="rounded-full"/>
+                                                        ) : (
+                                                            <Package className={"h-6 w-6 text-gray-500"}/>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-semibold">{sub.name}</h3>
+                                                        <p className="text-sm text-gray-500">
+                                                            ${sub.price.toFixed(2)} / {sub.billingCycle}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">Payment
+                                                            method: {sub.payment}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">
+                                                            Next billing: {sub.nextBillingString}
+                                                        </p>
+                                                        <span
+                                                            className="inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-purple-400 text-gray-700">{sub.category}</span>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h3 className="font-semibold">{sub.name}</h3>
-                                                    <p className="text-sm text-gray-500">
-                                                        ${sub.price.toFixed(2)} / {sub.billingCycle}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">Payment method: {sub.payment}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Next billing: {sub.nextBillingDate}
-                                                    </p>
-                                                    <span
-                                                        className="inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-purple-400 text-gray-700">{sub.category}</span>
-                                                </div>
-                                            </div>
-                                            <Button variant="destructive" size="icon"
-                                                    onClick={() => removeSubscription(sub.id)}>
-                                                <Trash2 className="h-4 w-4"/>
-                                            </Button>
-                                        </li>
-                                    ))}
+                                                <Button variant="destructive" size="icon"
+                                                        onClick={() => removeSubscription(sub.id)}>
+                                                    <Trash2 className="h-4 w-4"/>
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ScrollArea>
                                 </ul>
                             )}
                             <div className="mt-6 pt-4 border-tborder-gray-200">
@@ -388,25 +406,11 @@ export default function Home(props) {
                     <CardHeader>
                         <CardTitle className="text-2xl">User Settings</CardTitle>
                         <CardDescription className="text-gray-500">
-                            Customize your experience
+                            Manage your account
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="currency"
-                                       className={userSettings.darkMode ? "text-gray-300" : "text-gray-700"}>Currency</Label>
-                                <Select value={userSettings.currency}
-                                        onValueChange={(value) => setUserSettings({...userSettings, currency: value})}>
-                                    <SelectTrigger className="w-[180px] bg-white text-gray-900 border-gray-300">
-                                        <SelectValue placeholder="Select currency"/>
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-white text-gray-900 border-gray-300">
-                                        <SelectItem value="USD" className="focus:bg-gray-100">USD</SelectItem>
-                                        <SelectItem value="EUR" className="focus:bg-gray-100">EUR</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button variant="destructive"

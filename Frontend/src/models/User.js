@@ -20,15 +20,49 @@ const User = mongoose.Schema({
             type: String,
             required: [true, 'Password is required'],
         },
-        concurrency: {//0 USD and 1 EUR
-            type: Number,
-            default: 0,
-            required: [true, 'Concurrency is required'],
-        },
         createdAt: {
             type: Date,
             default: Date.now,
         },
+        subscriptions: [{
+            name: {
+                type: String,
+                required: [true, 'Name of subscription is required'],
+            },
+            logo: {
+                type: String,
+                required: [true, 'logo of subscription is required'],
+            },
+            price: {
+                type: Number,
+                required: true,
+            },
+            firstBillingDate: {
+                type: Date,
+                required: [true, 'First billing date is required'],
+            },
+            nextBillingDate: {
+                type: Date,
+                required: [true, 'Next billing date is required'],
+            },
+            nextBillingString: {
+                type: String,
+                required: [true, 'Next billing date is required'],
+            },
+            billingCycle: {
+                type: String,
+                required: [true, 'Billing of subscription is required'],
+            },
+            payment: {
+                type: String,
+                required: [true, 'Payment method of subscription is required'],
+            },
+            category: {
+                type: String,
+                required: [true, 'Category of subscription is required'],
+            },
+        }]
+
     }
 );
 

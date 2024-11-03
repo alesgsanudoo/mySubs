@@ -6,11 +6,9 @@ import connectDB from "@/lib/mongodb";
 import {notFound} from "next/navigation";
 
 export default async function handler(req, res) {
-    console.log("Delete")
     if (req.method === 'DELETE') {
         await connectDB()
-        const code = await verifyUser(req);
-        console.log(code)
+        const {code, findUser} = await verifyUser(req);
         if (code === 401) {
             return res.status(401).json({errorMessage: "Session not found..."})
         } else if (code === 404) {

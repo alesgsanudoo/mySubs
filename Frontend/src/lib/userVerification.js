@@ -18,8 +18,8 @@ export default async function verifyUser(req) {
             if (!findUser) { //User not found by ID, return null
                 return 404
             }
-            console.log(findUser)
-            return 200;
+            let code = 200
+            return {code, findUser};
         }
     }
     return 404
