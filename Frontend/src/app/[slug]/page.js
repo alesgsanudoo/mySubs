@@ -100,10 +100,12 @@ export default function Home(props) {
                         title: "Subscription added!",
                         description: "You subscription has been added correctly.",
                     })
-                    console.log(response.data.sub)
-                    console.log(response)
+                    setName('');
+                    setPrice('');
+                    setCategory('')
+                    setPayment('')
+                    setBillingCycle('')
                     setSubscriptions(response.data.sub);
-                    console.log(subscriptions)
                 }).catch((error) => {
                     console.log(error)
                     console.log(error.response);
