@@ -21,7 +21,7 @@ export default function NotFound() {
                     </h1>
                     <h2 className="text-3xl font-semibold mb-6 text-purple-700">Page Not Found</h2>
                     <p className="text-xl text-gray-600 text-center mb-8 max-w-md">
-                        <strong>Oops!</strong> The page you're looking for doesn't exist or has been moved.
+                        <strong>Oops!</strong> The page you&#39;re looking for doesn&#39;t exist or has been moved.
                     </p>
                     <Link href="/" passHref>
                         <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg py-2 px-6">

@@ -75,7 +75,7 @@ export default function Home(props) {
                 router.push('/error/404');
             }
         })
-    }, [])
+    }, [router, toast, props.params.slug])
 
     useEffect(() => {
         console.log("Subscriptions updated:", subscriptions);
