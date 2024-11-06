@@ -30,6 +30,7 @@ import Image from 'next/image'
 import axios from "axios";
 import {useRouter} from "next/navigation";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {getDate} from "date-fns";
 
 const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other']
 const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple']
@@ -39,6 +40,9 @@ export default function Home(props) {
     const [user, setUser] = useState(props.params.slug)
     const [name, setName] = useState('')
     const [price, setPrice] = useState('')
+    const [todayDate, setTodayDate] = useState(new Date().getDate())
+    const [todayMonth, setTodayMonth] = useState(new Date().getMonth() + 1)
+    const [todayYear, setTodayYear] = useState(new Date().getFullYear())
     const [payment, setPayment] = useState('')
     const [date, setDate] = useState('')
     const [category, setCategory] = useState('')
@@ -95,7 +99,6 @@ export default function Home(props) {
                     toast({
                         title: "Subscription added!",
                         description: "You subscription has been added correctly.",
-                        variant: "success",
                     })
                     console.log(response.data.sub)
                     console.log(response)
@@ -134,13 +137,36 @@ export default function Home(props) {
     }
 
     const removeSubscription = (id) => {
-        const subscriptionToRemove = subscriptions.find(sub => sub.id === id)
-        setSubscriptions(subscriptions.filter(sub => sub.id !== id))
-        toast({
-            title: "Subscription Removed",
-            description: `${subscriptionToRemove?.name} has been removed from your subscriptions.`,
-            variant: "destructive",
-        })
+        try {
+            axios.delete('/api/' + props.params.slug + '/subscriptions/delete/' + id).then((response) => {
+                toast({
+                    title: "Subscription removed!",
+                    description: "The subscription has been removed.",
+                    variant: "destructive",
+                })
+                setSubscriptions(response.data.sub);
+            }).catch((error) => {
+                console.log(error)
+                console.log(error.response);
+                if (error && error.response) {
+                    const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
+                    console.error('An error occurred:', error);
+                    toast({
+                        title: "Error",
+                        variant: "destructive",
+                        description: errorMessage,
+                    });
+                }
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.errorMessage || "An unexpected error occurred. Please try again later.";
+            console.error('An error occurred:', error);
+            toast({
+                title: "Error",
+                variant: "destructive",
+                description: errorMessage,
+            });
+        }
     }
 
     const totalMonthly = subscriptions.reduce((sum, sub) => {
@@ -365,22 +391,38 @@ export default function Home(props) {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-semibold">{sub.name}</h3>
+                                                        {Number(sub.nextBillingString.split('-')[1]) === todayDate
+                                                        && Number(sub.nextBillingString.split('-')[0]) === todayMonth
+                                                            && Number(sub.nextBillingString.split('-')[2]) === todayYear ?  (
+                                                            <h3 className="font-semibold">{sub.name}<span className="text-red-500"> DUE TODAY!</span></h3>
+                                                        ) : (
+                                                            <h3 className="font-semibold">{sub.name}</h3>
+                                                        )}
+
                                                         <p className="text-sm text-gray-500">
                                                             ${sub.price.toFixed(2)} / {sub.billingCycle}
                                                         </p>
                                                         <p className="text-sm text-gray-500">Payment
                                                             method: {sub.payment}
                                                         </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            Next billing: {sub.nextBillingString}
-                                                        </p>
+                                                        {Number(sub.nextBillingString.split('-')[1]) === todayDate
+                                                        && Number(sub.nextBillingString.split('-')[0]) === todayMonth
+                                                        && Number(sub.nextBillingString.split('-')[2]) === todayYear ?  (
+                                                            <p className="text-sm text-purple-400">
+                                                                Next billing: {sub.nextBillingString}
+                                                            </p>
+                                                        ) : (
+                                                            <p className="text-sm text-gray-500">
+                                                                Next billing: {sub.nextBillingString}
+                                                            </p>
+                                                        )
+                                                        }
                                                         <span
                                                             className="inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-purple-400 text-gray-700">{sub.category}</span>
                                                     </div>
                                                 </div>
                                                 <Button variant="destructive" size="icon"
-                                                        onClick={() => removeSubscription(sub.id)}>
+                                                        onClick={() => removeSubscription(sub._id)}>
                                                     <Trash2 className="h-4 w-4"/>
                                                 </Button>
                                             </li>

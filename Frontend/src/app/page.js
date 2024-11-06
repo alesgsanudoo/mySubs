@@ -45,7 +45,6 @@ export default function Home() {
             }
 
             try {
-                // Make a POST request to the API route using Axios
                 axios.post('/api/auth', {
                     isLogin: 1,
                     name,
@@ -66,8 +65,6 @@ export default function Home() {
                     router.push('/' + userID);
 
                 }).catch((error) => {
-                    console.log(error)
-                    console.log(error.response);
                     if (error && error.response) {
                         const {status, data} = error.response;
                         if (status === 400 || status === 409) { //Wrong syntax or No access
@@ -133,7 +130,6 @@ export default function Home() {
         e.preventDefault()
         if (password2 && username2) {
             try {
-                // Make a POST request to the API route using Axios
                 axios.post('/api/auth', {
                     isLogin: 0,
                     username2,
@@ -148,11 +144,8 @@ export default function Home() {
                     });
                     router.push('/' + userID);
                 }).catch((error) => {
-                    console.log(error)
-                    console.log(error.response);
                     if (error && error.response) {
                         const {status, data} = error.response;
-                        console.log("HERE")
                         if (status === 400 || status === 401) { //Wrong syntax or No access
                             setPasswordError2(data.errorMessage);
                             setUsernameError2(data.errorMessage);

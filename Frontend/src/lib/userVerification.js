@@ -3,7 +3,6 @@ import Session from "@/models/Session";
 import jwt from "jsonwebtoken";
 
 export default async function verifyUser(req) {
-    console.log("USER VERIFICATION")
     const cookies = req.cookies;
     if (req.query && cookies && cookies.LOGIN_INFO) {
         const userID = req.query.slug;

@@ -41,10 +41,6 @@ const User = mongoose.Schema({
                 type: Date,
                 required: [true, 'First billing date is required'],
             },
-            nextBillingDate: {
-                type: Date,
-                required: [true, 'Next billing date is required'],
-            },
             nextBillingString: {
                 type: String,
                 required: [true, 'Next billing date is required'],

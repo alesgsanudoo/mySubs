@@ -25,7 +25,7 @@ export default async function handler(req, res) {
             res.setHeader('Set-Cookie', cookie.serialize('LOGIN_INFO', '', {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                expires: new Date(0), // Set the expiration date to a past date
+                expires: new Date(0),
                 sameSite: 'strict',
                 path: '/',
             }));

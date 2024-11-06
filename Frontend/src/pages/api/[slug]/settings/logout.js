@@ -1,9 +1,7 @@
 import verifyUser from "@/lib/userVerification";
-import User from "@/models/User";
 import Session from "@/models/Session";
 import cookie from "cookie";
 import connectDB from "@/lib/mongodb";
-import {notFound} from "next/navigation";
 
 export default async function handler(req, res) {
     if (req.method === 'DELETE') {

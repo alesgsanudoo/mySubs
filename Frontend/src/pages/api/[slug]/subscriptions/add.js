@@ -1,6 +1,7 @@
 import connectDB from "@/lib/mongodb";
 import verifyUser from "@/lib/userVerification";
 import mongoose from "mongoose";
+import {calculateNextBillingMonthly, calculateNextBillingYearly} from "@/lib/utils";
 
 const categories = ['Streaming', 'Software', 'Gaming', 'Food', 'Fitness', 'Other'];
 const paymentCat = ['Card', 'Cash', 'Paypal', 'Apple'];
@@ -19,23 +20,22 @@ export default async function handler(req, res) {
             session.startTransaction();
             try {
                 const {name, price, date, payment, category, billingCycle} = req.body;
-                console.log(req.body)
                 if (!name || !price || !payment || !category || !billingCycle) {
                     return res.status(400).json({errorMessage: 'All fields are required.'});
                 }
 
 
                 if (price <= 0) {
-                    return res.status(400).json({ errorMessage: 'Invalid price. It must be a positive integer.' });
+                    return res.status(400).json({errorMessage: 'Invalid price. It must be a positive integer.'});
                 }
 
                 if (!categories.includes(category)) {
-                    return res.status(400).json({ message: 'Invalid category.' });
+                    return res.status(400).json({message: 'Invalid category.'});
                 }
 
                 const normalizedPayment = payment.trim().toLowerCase();
                 if (!paymentCat.map(p => p.toLowerCase()).includes(normalizedPayment)) {
-                    return res.status(400).json({ message: 'Invalid payment method.' });
+                    return res.status(400).json({message: 'Invalid payment method.'});
                 }
 
                 if (billingCycle !== 'monthly' && billingCycle === 'early') {
@@ -43,36 +43,24 @@ export default async function handler(req, res) {
                 }
 
                 const logo = await fetchLogo(name)
+                const [year, month, day] = date.split('-').map(Number);
 
-                const firstBillingDate = new Date(date);
-                let nextBillingDate;
+                const firstBillingDate = new Date(year, month - 1, day);
 
-                if (billingCycle === 'monthly') {
-                    nextBillingDate = new Date(firstBillingDate);
-                    nextBillingDate.setMonth(firstBillingDate.getMonth() + 1);
-                } else if (billingCycle === 'yearly') {
-                    nextBillingDate = new Date(firstBillingDate);
-                    nextBillingDate.setFullYear(firstBillingDate.getFullYear() + 1);
-                }
 
-                const currentDate = new Date();
+                const nextBillingDate = billingCycle === 'monthly' ? calculateNextBillingMonthly(date) : calculateNextBillingYearly(date);
 
-                if (currentDate >= nextBillingDate) {
-                    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+                const month2 = String(nextBillingDate.getUTCMonth() + 1).padStart(2, '0');
+                const day2 = String(nextBillingDate.getUTCDate()).padStart(2, '0');
+                const year2 = nextBillingDate.getUTCFullYear();
 
-                    if (nextBillingDate.getMonth() === 0) {
-                        nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
-                    }
-                }
-
-                const formattedNextBillingDate = `${nextBillingDate.getMonth() + 1} M - ${nextBillingDate.getDate()} D - ${nextBillingDate.getFullYear()} Y`;
+                const formattedNextBillingDate = `${month2}-${day2}-${year2}`;
 
                 const subscription = {
                     name: name,
                     logo: logo,
                     price: parseFloat(price),
                     firstBillingDate: firstBillingDate,
-                    nextBillingDate: nextBillingDate,
                     nextBillingString: formattedNextBillingDate,
                     payment: payment,
                     category: category,
@@ -81,7 +69,7 @@ export default async function handler(req, res) {
 
                 findUser.subscriptions.push(subscription);
 
-                await findUser.save({ session });
+                await findUser.save({session});
 
                 await session.commitTransaction();
                 await session.endSession();
@@ -90,7 +78,7 @@ export default async function handler(req, res) {
             } catch (e) {
                 await session.abortTransaction();
                 console.error('Error adding subscription:', e);
-                return res.status(500).json({ message: 'Internal server error' });
+                return res.status(500).json({message: 'Internal server error'});
             } finally {
                 await session.endSession();
 

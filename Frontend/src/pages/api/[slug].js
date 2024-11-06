@@ -1,10 +1,12 @@
 
 import verifyUser from "@/lib/userVerification";
 import connectDB from "@/lib/mongodb";
+import {calculateNextBillingMonthly, calculateNextBillingYearly} from "@/lib/utils";
+
+
 
 export default async function handler(req, res) {
     if (req.method === 'GET') {
-        console.log("USER VERIFICATION")
         await connectDB()
         const {code, findUser} = await verifyUser(req);
         if (code === 401) {
@@ -12,27 +14,28 @@ export default async function handler(req, res) {
         } else if (code === 404) {
             return res.redirect(307, '/error/404')
         } else if (code === 200) {
-            const currentDate = new Date();
             const updatedSubscriptions = findUser.subscriptions.map(sub => {
                 const subObj = sub.toObject();
-                const nextBillingDate = new Date(subObj.nextBillingDate);
 
-                if (currentDate >= nextBillingDate) {
-                    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
-                    if (nextBillingDate.getMonth() === 0) {
-                        nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
-                    }
-                }
+                const month = String(subObj.firstBillingDate.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(subObj.firstBillingDate.getUTCDate()).padStart(2, '0');
+                const year = subObj.firstBillingDate.getUTCFullYear();
+                const dateCon = `${year}-${month}-${day}`;
 
-                const formattedNextBillingDate = `${nextBillingDate.getMonth() + 1}-${nextBillingDate.getDate()}-${nextBillingDate.getFullYear()}`;
+                const nextBillingDate = subObj.billingCycle === 'monthly' ? calculateNextBillingMonthly(dateCon) : calculateNextBillingYearly(dateCon);
+
+                const month2 = String(nextBillingDate.getUTCMonth() + 1).padStart(2, '0');
+                const day2 = String(nextBillingDate.getUTCDate()).padStart(2, '0');
+                const year2 = nextBillingDate.getUTCFullYear();
+
+                const formattedNextBillingDate = `${month2}-${day2}-${year2}`;
 
                 return {
                     ...subObj,
                     nextBillingString: formattedNextBillingDate,
                 };
             });
-            console.log(updatedSubscriptions)
             return res.status(200).json({subs: updatedSubscriptions});
         }
         return res.status(404).json({errorMessage: "Something went wrong..."});
