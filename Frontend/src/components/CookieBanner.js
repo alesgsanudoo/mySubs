@@ -10,7 +10,7 @@ export default function CookieBanner() {
     useEffect(() => {
         const consent = Cookies.get('cookieConsent');
         if (!consent) {
-            setShowBanner(true);
+            setShowBanner(false);
         }
     }, []);
 
