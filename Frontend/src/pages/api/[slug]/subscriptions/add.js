@@ -97,6 +97,8 @@ const fetchLogo = async (companyName) => {
         console.log(data)
         if (data && data.length > 0) {
             return data[0].logo
+        } else {
+            return 'default'
         }
     } catch (error) {
         console.error('Error fetching logo:', error)

@@ -101,6 +101,7 @@ export default function Home(props) {
                         description: "You subscription has been added correctly.",
                     })
                     setName('');
+                    setDate('')
                     setPrice('');
                     setCategory('')
                     setPayment('')
@@ -385,7 +386,7 @@ export default function Home(props) {
                                                 className="flex items-center justify-between p-4 rounded-lg transition-all hover:bg-gray-200">
                                                 <div className="flex items-center space-x-4">
                                                     <div className="rounded-full p-2 flex-shrink-0 bg-white">
-                                                        {sub.logo ? (
+                                                        {sub.logo !== 'default' ? (
                                                             <Image src={sub.logo} alt={sub.name} width={24} height={24}
                                                                    className="rounded-full"/>
                                                         ) : (
