@@ -3,7 +3,7 @@
 MySubs Tracker, a webpage I created to keep track of all my subscriptions since I often forgot the billing dates. This helps me manage my finances more effectively. While I could have used Excel, I decided to turn it into a project for one of my CS classes, and it turned out great. I aimed to make it as secure as possible, and it’s built using Next.js and MongoDB.
 
 <div align="center">
-  <img alt="img" src="https://imgur.com/jygLm9D.png" width="50%" height="auto" />
+  <img alt="img" src="https://imgur.com/9jCNdUH.png" width="50%" height="auto" />
 </div>
 
 
