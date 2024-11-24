@@ -11,4 +11,7 @@ const Session = new mongoose.Schema({
     },
 });
 
+
+Session.index({ userID: 1, token: 1 }, { unique: true });
+
 export default mongoose.models.Session || mongoose.model('Session', Session);
