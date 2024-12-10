@@ -499,8 +499,8 @@ export default function Home(props) {
                 </Card>
                 <footer className="flex mb-10 flex-col space-y-2 mt-16 pr-4 pl-4 items-center">
                     <h2 className="text-gray-500">
-                        Made with love by <span
-                        className="font-bold text-purple-600 hover:text-purple-700">Alex</span> ❤️!
+                        Made with love by <a href="https://github.com/alesgsanudoo" target="_blank"
+                                             className="font-bold text-purple-600 hover:text-purple-700">Alex</a> ❤️!
                     </h2>
                     <h2 className="text-gray-500 text-center">
                         Built with <a href="https://nextjs.org/" target="_blank"

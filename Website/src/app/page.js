@@ -197,12 +197,16 @@ export default function Home() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-justify">
-                                        Welcome to MySubs Tracker, a webpage I created to keep track of all my
+                                        Welcome to <span className="font-bold text-purple-800">MySubs Tracker</span>, a webpage I created to keep track of all my
                                         subscriptions since I often forgot the billing dates. This helps me manage my
                                         finances more effectively. While I could have used Excel, I decided to turn it
                                         into a project for one of my CS classes, and it turned out great. I aimed to
-                                        make it as secure as possible, and it’s built using Next.js and MongoDB.<br></br><br></br>Alex
-                                        S</p>
+                                        make it as secure as possible, and it’s built using Next.js and MongoDB.
+                                        <br></br><br></br><a href="https://github.com/alesgsanudoo/mySubs" target="_blank"
+                                                             className="font-bold text-purple-600 hover:text-purple-800">
+                                            Github Repository</a>
+                                        <br></br><br></br><b>Alex S</b>
+                                        </p>
 
                                 </CardContent>
                             </Card>
@@ -417,8 +421,8 @@ export default function Home() {
                 </div>
                 <footer className="flex mb-10 flex-col space-y-2 mt-16 pr-4 pl-4 items-center">
                     <h2 className="text-gray-500">
-                        Made with love by <span
-                        className="font-bold text-purple-600 hover:text-purple-700">Alex</span> ❤️!
+                        Made with love by <a href="https://github.com/alesgsanudoo" target="_blank"
+                        className="font-bold text-purple-600 hover:text-purple-700">Alex</a> ❤️!
                     </h2>
                     <h2 className="text-gray-500 text-center">
                         Built with <a href="https://nextjs.org/" target="_blank"
